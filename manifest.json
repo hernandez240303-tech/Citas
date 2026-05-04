@@ -1,0 +1,16 @@
+{
+  "short_name": "GlowStudio",
+  "name": "Glow Studio | Agenda Pro",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050186.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#ff8fa3",
+  "background_color": "#fdfafb"
+}
