@@ -1,10 +1,10 @@
 {
-  "short_name": "GlowStudio",
-  "name": "Glow Studio | Agenda Pro",
+  "short_name": "Citas",
+  "name": "Sol Radiante",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050186.png",
-      "type": "image/png",
+      "src": "logo.jpg",
+      "type": "image/jpeg",
       "sizes": "512x512",
       "purpose": "any maskable"
     }
