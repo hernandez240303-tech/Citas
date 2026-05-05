@@ -27,21 +27,18 @@ const limpiarFormulario = () => {
     form.reset();
 };
 
-if (btnCancelarEdit) {
-    btnCancelarEdit.addEventListener('click', (e) => { e.preventDefault(); limpiarFormulario(); });
-}
-
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = editIdInput.value;
     const fVal = document.getElementById("fecha").value;
     const hVal = document.getElementById("hora").value;
 
-    // Validación de duplicados
+    // VALIDACIÓN: ¿Horario ocupado?
     const ocupado = citas.some(c => c.fecha === fVal && c.hora === hVal && c.id.toString() !== id);
-    if (ocupado) { 
-        modalError.style.display = 'flex'; 
-        return; 
+    
+    if (ocupado) {
+        modalError.style.display = 'flex'; // Muestra la ventana emergente
+        return;
     }
 
     const info = {
@@ -71,7 +68,7 @@ const render = () => {
         c.nombre.toLowerCase().includes(busqueda) && (filtro === "todos" || c.estado === filtro)
     );
 
-    // Ordenamiento cronológico: Fecha y luego Hora
+    // ORDENAR: Primero por fecha, luego por hora
     filtradas.sort((a, b) => {
         if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
         return a.hora.localeCompare(b.hora);
@@ -97,6 +94,10 @@ const render = () => {
     updateDashboard();
 };
 
+// Funciones Globales para Modales y Acciones
+window.cerrarModalError = () => { modalError.style.display = 'none'; };
+window.abrirModal = (id) => { idEliminar = id; modal.style.display = 'flex'; };
+window.cerrarModal = () => { modal.style.display = 'none'; };
 window.prepararEdicion = (id) => {
     const c = citas.find(cita => cita.id === id);
     editIdInput.value = c.id;
@@ -112,12 +113,15 @@ window.prepararEdicion = (id) => {
 };
 
 window.completar = (id) => { citas = citas.map(c => c.id === id ? { ...c, estado: 'finalizada' } : c); render(); };
-window.abrirModal = (id) => { idEliminar = id; modal.style.display = 'flex'; };
-window.cerrarModal = () => { modal.style.display = 'none'; };
-window.cerrarModalError = () => { modalError.style.display = 'none'; };
 
-document.getElementById("confirmarEliminar").onclick = () => { citas = citas.filter(c => c.id !== idEliminar); render(); cerrarModal(); };
+document.getElementById("confirmarEliminar").onclick = () => {
+    citas = citas.filter(c => c.id !== idEliminar);
+    render();
+    cerrarModal();
+};
+
 document.getElementById("cancelarEliminar").onclick = cerrarModal;
+document.getElementById("btnCancelarEdit").onclick = limpiarFormulario;
 document.getElementById("buscar").oninput = render;
 document.getElementById("filtroEstado").onchange = render;
 document.getElementById("toggleDark").onclick = () => { document.body.classList.toggle("dark"); };
