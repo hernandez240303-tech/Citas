@@ -2,11 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glow Studio | Agenda Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sol Radiante | Nails & Lash</title>
+    <!-- Pirata One para Sol Radiante, Playfair para NAILS & LASH y Montserrat para el resto -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&family=Pirata+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff8fa3">
     <script>
@@ -20,8 +22,8 @@
 <div class="app-container">
     <header class="main-header">
         <div class="logo">
-            <i class="fas fa-crown"></i>
-            <h1>Glow<span>Studio</span></h1>
+            <i class="fas fa-sun"></i>
+            <h1 class="font-sol">Sol Radiante</h1>
         </div>
         <button id="toggleDark" class="btn-theme">
             <i class="fas fa-moon"></i>
@@ -29,10 +31,9 @@
     </header>
 
     <main class="content-wrapper">
-        <!-- PANEL IZQUIERDO -->
         <aside class="side-panel">
             <div class="welcome-card">
-                <h2>Beauty Dashboard</h2>
+                <h2 class="brand-title">NAILS & LASH</h2>
                 <p>Tu espacio personal de belleza</p>
             </div>
 
@@ -53,14 +54,13 @@
                 <h3 id="formTitle">Nueva Cita</h3>
                 <form id="formCita">
                     <input type="hidden" id="editId">
-                    
                     <div class="field">
                         <label>Nombre de la clienta</label>
                         <input type="text" id="nombre" placeholder="Nombre completo" required>
                     </div>
                     <div class="field">
                         <label>Servicio</label>
-                        <input type="text" id="servicio" placeholder="Ej. Balayage, Uñas, etc." required>
+                        <input type="text" id="servicio" placeholder="Ej. Uñas Acrílicas, Pestañas..." required>
                     </div>
                     <div class="field-row">
                         <div class="field">
@@ -76,7 +76,6 @@
                         <label>Anticipo ($)</label>
                         <input type="number" id="anticipo" placeholder="0.00" step="0.01">
                     </div>
-                    
                     <div class="form-actions">
                         <button type="submit" id="btnSubmit" class="btn-submit">Confirmar Cita</button>
                         <button type="button" id="btnCancelarEdit" class="btn-cancel-edit" style="display: none;">Cancelar Modificación</button>
@@ -85,7 +84,6 @@
             </div>
         </aside>
 
-        <!-- PANEL DERECHO -->
         <section class="main-panel">
             <div class="filter-bar">
                 <div class="search-box">
@@ -98,18 +96,14 @@
                     <option value="finalizada">Finalizadas</option>
                 </select>
             </div>
-            
             <ul id="listaCitas" class="citas-container"></ul>
         </section>
     </main>
 </div>
 
-<!-- MODAL ELIMINAR -->
 <div id="modal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
-        <div class="modal-icon">
-            <i class="fas fa-trash-can"></i>
-        </div>
+        <div class="modal-icon"><i class="fas fa-trash-can"></i></div>
         <h3>¿Eliminar registro?</h3>
         <p>Esta acción quitará a la clienta de la lista permanentemente.</p>
         <div class="modal-actions">
