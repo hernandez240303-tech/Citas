@@ -51,7 +51,7 @@ body { background: var(--bg); color: var(--text); transition: background 0.3s; o
 
 .btn-theme { background: var(--bg); border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; color: var(--primary); }
 
-/* --- DISEÑO ADAPTADO IPHONE --- */
+/* --- DISEÑO ADAPTADO --- */
 .content-wrapper { display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 2rem; max-width: 1400px; margin: 0 auto; }
 .welcome-card { text-align: center; margin-bottom: 1.5rem; }
 .welcome-card p { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
@@ -67,7 +67,7 @@ body { background: var(--bg); color: var(--text); transition: background 0.3s; o
 
 .field { margin-bottom: 1rem; }
 .field label { display: block; font-size: 0.7rem; font-weight: 600; margin-bottom: 5px; color: var(--text-light); text-transform: uppercase; }
-input, select { width: 100%; padding: 0.8rem 1rem; border-radius: 1.2rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; /* Evita zoom automático en iOS */ }
+input, select { width: 100%; padding: 0.8rem 1rem; border-radius: 1.2rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 
 .btn-submit { width: 100%; padding: 1rem; border: none; border-radius: 1.2rem; background: var(--primary); color: white; font-weight: 600; cursor: pointer; transition: 0.3s; }
@@ -100,12 +100,34 @@ li.finalizada { border-left-color: var(--success); opacity: 0.8; }
 .btn-done { background: #e8fcf1; color: var(--success); }
 .btn-trash { background: #fff0f0; color: #e74c3c; }
 
-/* --- MODAL --- */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-.modal-card { background: var(--card); padding: 2.5rem 1.5rem; border-radius: 2.5rem; text-align: center; max-width: 340px; width: 85%; }
-.modal-icon { font-size: 2.5rem; color: #e74c3c; margin-bottom: 1rem; }
-.btn-danger { background: #e74c3c; color: white; padding: 1rem; border: none; border-radius: 1.2rem; font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 0.8rem; }
-.btn-cancel { background: var(--bg); color: var(--text); padding: 1rem; border: none; border-radius: 1.2rem; font-weight: 600; cursor: pointer; width: 100%; }
+/* --- MODAL REDISEÑADO --- */
+.modal-overlay { 
+    position: fixed; inset: 0; 
+    background: rgba(45, 35, 46, 0.4); 
+    backdrop-filter: blur(8px); 
+    display: flex; justify-content: center; align-items: center; 
+    z-index: 2000; padding: 20px;
+}
+.modal-card { 
+    background: var(--card); padding: 2.5rem 2rem; border-radius: 2.5rem; 
+    text-align: center; max-width: 380px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); border: 1px solid var(--border);
+    animation: modalAppear 0.3s ease-out;
+}
+@keyframes modalAppear { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem; opacity: 0.8; }
+.modal-card h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--text); margin-bottom: 0.8rem; }
+.modal-card p { font-size: 0.9rem; color: var(--text-light); line-height: 1.5; margin-bottom: 2.2rem; }
+.btn-confirm-delete { 
+    background: var(--primary); color: white; padding: 1.1rem; border: none; border-radius: 1.2rem; 
+    font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 0.8rem; transition: 0.3s; font-size: 1rem;
+}
+.btn-confirm-delete:hover { background: var(--primary-dark); transform: translateY(-2px); }
+.btn-keep { 
+    background: transparent; color: var(--text-light); padding: 1rem; border: 1px solid var(--border); 
+    border-radius: 1.2rem; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s;
+}
+.btn-keep:hover { background: var(--bg); color: var(--text); }
 
 @media (min-width: 992px) {
     .content-wrapper { flex-direction: row; align-items: flex-start; padding: 2rem 5%; }
