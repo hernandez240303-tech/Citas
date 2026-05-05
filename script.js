@@ -4,6 +4,7 @@ let idEliminar = null;
 const form = document.getElementById("formCita");
 const lista = document.getElementById("listaCitas");
 const modal = document.getElementById("modal");
+const modalError = document.getElementById("modalError");
 const editIdInput = document.getElementById("editId");
 const btnSubmit = document.getElementById("btnSubmit");
 const btnCancelarEdit = document.getElementById("btnCancelarEdit");
@@ -26,23 +27,24 @@ const limpiarFormulario = () => {
     form.reset();
 };
 
-// ESTA ES LA ÚNICA MODIFICACIÓN:
-// Usamos addEventListener para que GitHub Pages y los móviles detecten el clic siempre.
 if (btnCancelarEdit) {
-    btnCancelarEdit.addEventListener('click', (e) => {
-        e.preventDefault();
-        limpiarFormulario();
-    });
+    btnCancelarEdit.addEventListener('click', (e) => { e.preventDefault(); limpiarFormulario(); });
 }
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = editIdInput.value;
+    const fVal = document.getElementById("fecha").value;
+    const hVal = document.getElementById("hora").value;
+
+    const ocupado = citas.some(c => c.fecha === fVal && c.hora === hVal && c.id.toString() !== id);
+    if (ocupado) { modalError.style.display = 'flex'; return; }
+
     const info = {
         nombre: document.getElementById("nombre").value,
         servicio: document.getElementById("servicio").value,
-        fecha: document.getElementById("fecha").value,
-        hora: document.getElementById("hora").value,
+        fecha: fVal,
+        hora: hVal,
         anticipo: document.getElementById("anticipo").value || 0
     };
 
@@ -62,9 +64,13 @@ const render = () => {
     const filtro = document.getElementById("filtroEstado").value;
     
     let filtradas = citas.filter(c => 
-        c.nombre.toLowerCase().includes(busqueda) && 
-        (filtro === "todos" || c.estado === filtro)
+        c.nombre.toLowerCase().includes(busqueda) && (filtro === "todos" || c.estado === filtro)
     );
+
+    filtradas.sort((a, b) => {
+        if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+        return a.hora.localeCompare(b.hora);
+    });
 
     filtradas.forEach(c => {
         const li = document.createElement("li");
@@ -103,6 +109,7 @@ window.prepararEdicion = (id) => {
 window.completar = (id) => { citas = citas.map(c => c.id === id ? { ...c, estado: 'finalizada' } : c); render(); };
 window.abrirModal = (id) => { idEliminar = id; modal.style.display = 'flex'; };
 window.cerrarModal = () => { modal.style.display = 'none'; };
+window.cerrarModalError = () => { modalError.style.display = 'none'; };
 
 document.getElementById("confirmarEliminar").onclick = () => { citas = citas.filter(c => c.id !== idEliminar); render(); cerrarModal(); };
 document.getElementById("cancelarEliminar").onclick = cerrarModal;
