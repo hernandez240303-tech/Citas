@@ -1,138 +1,106 @@
-:root {
-    --primary: #ff8fa3;
-    --primary-dark: #ff4d6d;
-    --secondary: #0ea5e9;
-    --dark: #2d232e;
-    --bg: #fdfafb;
-    --card: #ffffff;
-    --text: #4a4a4a;
-    --text-light: #a0a0a0;
-    --border: #f0f0f0;
-    --shadow: 0 10px 40px rgba(255, 143, 163, 0.1);
-    --success: #2ecc71;
+let citas = JSON.parse(localStorage.getItem("sol_radiante_v3")) || [];
+let idEliminar = null;
+
+const form = document.getElementById("formCita");
+const lista = document.getElementById("listaCitas");
+const modal = document.getElementById("modal");
+const editIdInput = document.getElementById("editId");
+const btnSubmit = document.getElementById("btnSubmit");
+const btnCancelarEdit = document.getElementById("btnCancelarEdit");
+const formTitle = document.getElementById("formTitle");
+
+function updateDashboard() {
+    const hoy = new Date().toISOString().split('T')[0];
+    const citasHoy = citas.filter(c => c.fecha === hoy).length;
+    const ingresos = citas.reduce((acc, c) => acc + parseFloat(c.anticipo || 0), 0);
+    document.getElementById("countCitas").innerText = citasHoy;
+    document.getElementById("totalAnticipos").innerText = `$${ingresos.toFixed(0)}`;
+    localStorage.setItem("sol_radiante_v3", JSON.stringify(citas));
 }
 
-body.dark {
-    --bg: #1a1617;
-    --card: #252122;
-    --text: #eee;
-    --border: #3d3d3d;
-    --shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+form.onsubmit = (e) => {
+    e.preventDefault();
+    const id = editIdInput.value;
+    const nuevaInfo = {
+        nombre: document.getElementById("nombre").value,
+        servicio: document.getElementById("servicio").value,
+        fecha: document.getElementById("fecha").value,
+        hora: document.getElementById("hora").value,
+        anticipo: document.getElementById("anticipo").value || 0
+    };
+
+    if (id) {
+        citas = citas.map(c => c.id.toString() === id ? { ...c, ...nuevaInfo } : c);
+        limpiarFormulario();
+    } else {
+        citas.push({ id: Date.now(), ...nuevaInfo, estado: "pendiente" });
+    }
+    form.reset();
+    render();
+};
+
+function render() {
+    lista.innerHTML = "";
+    const busqueda = document.getElementById("buscar").value.toLowerCase();
+    const filtro = document.getElementById("filtroEstado").value;
+    let filtradas = citas.filter(c => c.nombre.toLowerCase().includes(busqueda) && (filtro === "todos" || c.estado === filtro));
+    filtradas.sort((a,b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+
+    filtradas.forEach(c => {
+        const li = document.createElement("li");
+        li.className = c.estado;
+        li.innerHTML = `
+            <div class="c-info">
+                <strong>${c.nombre}</strong>
+                <p><i class="fas fa-magic"></i> ${c.servicio}</p>
+                <p><i class="far fa-calendar"></i> ${c.fecha} • <i class="far fa-clock"></i> ${c.hora}</p>
+                <div class="c-badge">Anticipo: $${c.anticipo}</div>
+            </div>
+            <div class="c-btns">
+                <button class="btn-edit" onclick="prepararEdicion(${c.id})"><i class="fas fa-pen"></i></button>
+                ${c.estado === 'pendiente' ? `<button class="btn-done" onclick="completar(${c.id})"><i class="fas fa-check"></i></button>` : ''}
+                <button class="btn-trash" onclick="abrirModal(${c.id})"><i class="fas fa-trash-alt"></i></button>
+            </div>`;
+        lista.appendChild(li);
+    });
+    updateDashboard();
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
-body { background: var(--bg); color: var(--text); transition: background 0.3s; overflow-x: hidden; }
-
-/* --- TIPOGRAFÍAS --- */
-.font-sol {
-    font-family: 'Pirata One', cursive !important;
-    font-weight: 400;
-    color: var(--primary) !important;
-    font-size: 2.2rem;
+function prepararEdicion(id) {
+    const c = citas.find(cita => cita.id === id);
+    editIdInput.value = c.id;
+    document.getElementById("nombre").value = c.nombre;
+    document.getElementById("servicio").value = c.servicio;
+    document.getElementById("fecha").value = c.fecha;
+    document.getElementById("hora").value = c.hora;
+    document.getElementById("anticipo").value = c.anticipo;
+    formTitle.innerText = "Modificar Cita";
+    btnSubmit.innerText = "Guardar Cambios";
+    btnCancelarEdit.style.display = "block";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-.brand-title {
-    font-family: 'Playfair Display', serif !important;
-    font-weight: 700;
-    font-style: italic;
-    color: var(--primary);
-    font-size: 2.5rem;
-    letter-spacing: 1px;
+function limpiarFormulario() {
+    editIdInput.value = "";
+    formTitle.innerText = "Nueva Cita";
+    btnSubmit.innerText = "Confirmar Cita";
+    btnCancelarEdit.style.display = "none";
+    form.reset();
 }
 
-/* --- HEADER --- */
-.main-header {
-    padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center;
-    background: var(--card); border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 1000;
-}
-.logo { display: flex; align-items: center; gap: 12px; }
-.logo i { color: #ffb703; font-size: 1.8rem; }
+// CONEXIÓN DEL BOTÓN CANCELAR
+btnCancelarEdit.onclick = limpiarFormulario;
 
-.btn-theme { background: var(--bg); border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; color: var(--primary); }
+function completar(id) { citas = citas.map(c => c.id === id ? { ...c, estado: 'finalizada' } : c); render(); }
+function abrirModal(id) { idEliminar = id; modal.style.display = 'flex'; }
+function cerrarModal() { modal.style.display = 'none'; }
 
-/* --- DISEÑO ADAPTADO --- */
-.content-wrapper { display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 2rem; max-width: 1400px; margin: 0 auto; }
-.welcome-card { text-align: center; margin-bottom: 1.5rem; }
-.welcome-card p { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
+// Botones del Modal
+document.getElementById("confirmarEliminar").onclick = () => { citas = citas.filter(c => c.id !== idEliminar); render(); cerrarModal(); };
+document.getElementById("cancelarEliminar").onclick = cerrarModal;
 
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-.stat-box { background: var(--card); padding: 1.2rem; border-radius: 1.5rem; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border); }
-.stat-box i { color: var(--primary); font-size: 1.2rem; margin-bottom: 5px; display: block; }
-.stat-box span { display: block; font-size: 1.4rem; font-weight: 600; }
-.stat-box label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-light); font-weight: 700; }
+document.getElementById("buscar").oninput = render;
+document.getElementById("filtroEstado").onchange = render;
+document.getElementById("toggleDark").onclick = () => { document.body.classList.toggle("dark"); };
 
-.card { background: var(--card); padding: 1.8rem; border-radius: 2rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
-.form-card h3 { margin-bottom: 1.2rem; font-family: 'Playfair Display', serif; font-size: 1.3rem; text-align: center; }
-
-.field { margin-bottom: 1rem; }
-.field label { display: block; font-size: 0.7rem; font-weight: 600; margin-bottom: 5px; color: var(--text-light); text-transform: uppercase; }
-input, select { width: 100%; padding: 0.8rem 1rem; border-radius: 1.2rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-
-.btn-submit { width: 100%; padding: 1rem; border: none; border-radius: 1.2rem; background: var(--primary); color: white; font-weight: 600; cursor: pointer; transition: 0.3s; }
-.btn-submit:hover { background: var(--primary-dark); }
-.btn-cancel-edit { width: 100%; padding: 0.8rem; border: none; border-radius: 1.2rem; background: #eee; color: #666; font-weight: 600; cursor: pointer; margin-top: 10px; }
-
-/* --- LISTA --- */
-.filter-bar { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
-.search-box { position: relative; width: 100%; }
-.search-box i { position: absolute; left: 1.2rem; top: 0.9rem; color: var(--text-light); }
-.search-box input { padding-left: 3rem; border-radius: 2rem; }
-select { appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ff8fa3%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1.2rem top 50%; background-size: 0.65rem auto; }
-
-.citas-container { list-style: none; display: grid; grid-template-columns: 1fr; gap: 1rem; }
-li { 
-    background: var(--card); padding: 1.2rem; border-radius: 1.8rem; border-left: 8px solid var(--primary); 
-    display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow); border: 1px solid var(--border); border-left-width: 8px;
-}
-@media (min-width: 480px) { li { flex-direction: row; justify-content: space-between; align-items: center; } }
-li.finalizada { border-left-color: var(--success); opacity: 0.8; }
-
-.c-info strong { font-size: 1.1rem; font-family: 'Playfair Display', serif; display: block; margin-bottom: 2px; }
-.c-info p { font-size: 0.8rem; color: var(--text-light); margin: 1px 0; }
-.c-badge { display: inline-block; margin-top: 6px; padding: 3px 12px; background: #fff0f3; color: var(--primary); border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
-
-.c-btns { display: flex; gap: 8px; width: 100%; justify-content: flex-end; }
-@media (min-width: 480px) { .c-btns { width: auto; } }
-.c-btns button { width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer; }
-.btn-edit { background: #e0f2fe; color: var(--secondary); }
-.btn-done { background: #e8fcf1; color: var(--success); }
-.btn-trash { background: #fff0f0; color: #e74c3c; }
-
-/* --- MODAL REDISEÑADO --- */
-.modal-overlay { 
-    position: fixed; inset: 0; 
-    background: rgba(45, 35, 46, 0.4); 
-    backdrop-filter: blur(8px); 
-    display: flex; justify-content: center; align-items: center; 
-    z-index: 2000; padding: 20px;
-}
-.modal-card { 
-    background: var(--card); padding: 2.5rem 2rem; border-radius: 2.5rem; 
-    text-align: center; max-width: 380px; width: 100%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); border: 1px solid var(--border);
-    animation: modalAppear 0.3s ease-out;
-}
-@keyframes modalAppear { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.modal-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem; opacity: 0.8; }
-.modal-card h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--text); margin-bottom: 0.8rem; }
-.modal-card p { font-size: 0.9rem; color: var(--text-light); line-height: 1.5; margin-bottom: 2.2rem; }
-.btn-confirm-delete { 
-    background: var(--primary); color: white; padding: 1.1rem; border: none; border-radius: 1.2rem; 
-    font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 0.8rem; transition: 0.3s; font-size: 1rem;
-}
-.btn-confirm-delete:hover { background: var(--primary-dark); transform: translateY(-2px); }
-.btn-keep { 
-    background: transparent; color: var(--text-light); padding: 1rem; border: 1px solid var(--border); 
-    border-radius: 1.2rem; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s;
-}
-.btn-keep:hover { background: var(--bg); color: var(--text); }
-
-@media (min-width: 992px) {
-    .content-wrapper { flex-direction: row; align-items: flex-start; padding: 2rem 5%; }
-    .side-panel { width: 400px; position: sticky; top: 100px; }
-    .main-panel { flex: 1; }
-    .citas-container { grid-template-columns: 1fr 1fr; }
-    .filter-bar { flex-direction: row; }
-}
+render();
