@@ -37,8 +37,12 @@ form.addEventListener('submit', (e) => {
     const fVal = document.getElementById("fecha").value;
     const hVal = document.getElementById("hora").value;
 
+    // Validación de duplicados
     const ocupado = citas.some(c => c.fecha === fVal && c.hora === hVal && c.id.toString() !== id);
-    if (ocupado) { modalError.style.display = 'flex'; return; }
+    if (ocupado) { 
+        modalError.style.display = 'flex'; 
+        return; 
+    }
 
     const info = {
         nombre: document.getElementById("nombre").value,
@@ -67,6 +71,7 @@ const render = () => {
         c.nombre.toLowerCase().includes(busqueda) && (filtro === "todos" || c.estado === filtro)
     );
 
+    // Ordenamiento cronológico: Fecha y luego Hora
     filtradas.sort((a, b) => {
         if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
         return a.hora.localeCompare(b.hora);
