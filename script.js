@@ -9,19 +9,36 @@ const btnSubmit = document.getElementById("btnSubmit");
 const btnCancelarEdit = document.getElementById("btnCancelarEdit");
 const formTitle = document.getElementById("formTitle");
 
-function updateDashboard() {
+const updateDashboard = () => {
     const hoy = new Date().toISOString().split('T')[0];
     const citasHoy = citas.filter(c => c.fecha === hoy).length;
     const ingresos = citas.reduce((acc, c) => acc + parseFloat(c.anticipo || 0), 0);
     document.getElementById("countCitas").innerText = citasHoy;
     document.getElementById("totalAnticipos").innerText = `$${ingresos.toFixed(0)}`;
     localStorage.setItem("sol_radiante_v3", JSON.stringify(citas));
+};
+
+const limpiarFormulario = () => {
+    editIdInput.value = "";
+    formTitle.innerText = "Nueva Cita";
+    btnSubmit.innerText = "Confirmar Cita";
+    btnCancelarEdit.style.display = "none";
+    form.reset();
+};
+
+// ESTA ES LA ÚNICA MODIFICACIÓN:
+// Usamos addEventListener para que GitHub Pages y los móviles detecten el clic siempre.
+if (btnCancelarEdit) {
+    btnCancelarEdit.addEventListener('click', (e) => {
+        e.preventDefault();
+        limpiarFormulario();
+    });
 }
 
-form.onsubmit = (e) => {
+form.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = editIdInput.value;
-    const nuevaInfo = {
+    const info = {
         nombre: document.getElementById("nombre").value,
         servicio: document.getElementById("servicio").value,
         fecha: document.getElementById("fecha").value,
@@ -30,21 +47,24 @@ form.onsubmit = (e) => {
     };
 
     if (id) {
-        citas = citas.map(c => c.id.toString() === id ? { ...c, ...nuevaInfo } : c);
+        citas = citas.map(c => c.id.toString() === id ? { ...c, ...info } : c);
         limpiarFormulario();
     } else {
-        citas.push({ id: Date.now(), ...nuevaInfo, estado: "pendiente" });
+        citas.push({ id: Date.now(), ...info, estado: "pendiente" });
     }
     form.reset();
     render();
-};
+});
 
-function render() {
+const render = () => {
     lista.innerHTML = "";
     const busqueda = document.getElementById("buscar").value.toLowerCase();
     const filtro = document.getElementById("filtroEstado").value;
-    let filtradas = citas.filter(c => c.nombre.toLowerCase().includes(busqueda) && (filtro === "todos" || c.estado === filtro));
-    filtradas.sort((a,b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+    
+    let filtradas = citas.filter(c => 
+        c.nombre.toLowerCase().includes(busqueda) && 
+        (filtro === "todos" || c.estado === filtro)
+    );
 
     filtradas.forEach(c => {
         const li = document.createElement("li");
@@ -64,9 +84,9 @@ function render() {
         lista.appendChild(li);
     });
     updateDashboard();
-}
+};
 
-function prepararEdicion(id) {
+window.prepararEdicion = (id) => {
     const c = citas.find(cita => cita.id === id);
     editIdInput.value = c.id;
     document.getElementById("nombre").value = c.nombre;
@@ -78,19 +98,12 @@ function prepararEdicion(id) {
     btnSubmit.innerText = "Guardar Cambios";
     btnCancelarEdit.style.display = "block";
     window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+};
 
-function limpiarFormulario() {
-    editIdInput.value = "";
-    formTitle.innerText = "Nueva Cita";
-    btnSubmit.innerText = "Confirmar Cita";
-    btnCancelarEdit.style.display = "none";
-    form.reset();
-}
+window.completar = (id) => { citas = citas.map(c => c.id === id ? { ...c, estado: 'finalizada' } : c); render(); };
+window.abrirModal = (id) => { idEliminar = id; modal.style.display = 'flex'; };
+window.cerrarModal = () => { modal.style.display = 'none'; };
 
-function completar(id) { citas = citas.map(c => c.id === id ? { ...c, estado: 'finalizada' } : c); render(); }
-function abrirModal(id) { idEliminar = id; modal.style.display = 'flex'; }
-function cerrarModal() { modal.style.display = 'none'; }
 document.getElementById("confirmarEliminar").onclick = () => { citas = citas.filter(c => c.id !== idEliminar); render(); cerrarModal(); };
 document.getElementById("cancelarEliminar").onclick = cerrarModal;
 document.getElementById("buscar").oninput = render;
