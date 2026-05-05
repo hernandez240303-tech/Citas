@@ -136,3 +136,18 @@ li.finalizada { border-left-color: var(--success); opacity: 0.8; }
     .citas-container { grid-template-columns: 1fr 1fr; }
     .filter-bar { flex-direction: row; }
 }
+
+#modalError.modal-overlay {
+    display: none; /* Se controla por JS */
+}
+
+/* Color específico para el icono de advertencia de horario */
+#modalError .modal-icon i {
+    color: #ff4d6d; /* Tono primary-dark para resaltar error */
+}
+
+/* Ajuste de visibilidad para body dark en badges */
+body.dark .c-badge {
+    background: #3d2a2d;
+    color: var(--primary);
+}
